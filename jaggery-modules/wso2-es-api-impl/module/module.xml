@@ -1,0 +1,22 @@
+<module name="wso2-es-api-impl" xmlns="http://wso2.org/projects/jaggery/module.xml">
+	<script>
+		<name>app</name>
+		<path>scripts/app/app.js</path>
+	</script>
+	<script>
+		<name>assets</name>
+		<path>scripts/assets/assets.js</path>
+	</script>
+	<script>
+		<name>server</name>
+		<path>scripts/server/server.js</path>
+	</script>
+		<script>
+		<name>artifacts</name>
+		<path>scripts/artifacts/artifacts.js</path>
+	</script>
+	<script>
+		<name>plugins</name>
+		<path>scripts/plugins/plugins.js</path>
+	</script>
+</module>

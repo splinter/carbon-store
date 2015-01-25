@@ -1,0 +1,10 @@
+<module name="wso2-es-engine-extension" xmlns="http://wso2.org/projects/jaggery/module.xml">
+	<script>
+		<name>workflows</name>
+		<path>scripts/workflows/workflows.js</path>
+	</script>
+	<script>
+		<name>plugins</name>
+		<path>scripts/plugins/plugins.js</path>
+	</script>
+</module>

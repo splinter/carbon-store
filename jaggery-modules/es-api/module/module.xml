@@ -1,0 +1,22 @@
+<module name="es-api" xmlns="http://wso2.org/projects/jaggery/module.xml">
+	<script>
+		<name>app</name>
+		<path>scripts/app/app.js</path>
+	</script>
+	<script>
+		<name>artifacts</name>
+		<path>scripts/artifacts/artifacts.js</path>
+	</script>
+	<script>
+		<name>asset</name>
+		<path>scripts/asset/asset.js</path>
+	</script>
+	<script>
+		<name>server</name>
+		<path>scripts/server/server.js</path>
+	</script>
+	<script>
+		<name>lifecycles</name>
+		<path>scripts/lifecycles/lifecycles.js</path>
+	</script>
+</module>
