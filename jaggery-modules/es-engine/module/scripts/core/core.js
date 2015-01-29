@@ -9,9 +9,10 @@ var core = {};
         this.impls = {};
     }
     ExtensionBase.prototype.register = function(key, impl) {
+        log.info('Register callled');
         this.impls[key] = impl;
     };
-    ExtensionBase.prototype.get = function(key) {
+    ExtensionBase.prototype.getPlugin = function(key) {
         return this.impls[key];
     };
 

@@ -7,8 +7,17 @@ var engine = {};
         this.msg = msg;
     }
 
-    function EngineContext() {}
-    EngineContext.prototype = Object.create(core.ExtensionBase);
+    function EngineContext() {
+        this.plugins={};
+    }
+    EngineContext.prototype.registerPlugin = function(key,plugin){
+        this.plugins[key] =  plugin;
+    };
+
+    EngineContext.prototype.getPlugin = function(key){
+        return this.plugins[key];
+    };
+    //EngineContext.prototype = Object.create(core.ExtensionBase.prototype);
 
     function EngineInstance() {
         this.context = new EngineContext();
@@ -18,10 +27,20 @@ var engine = {};
         return this.context;
     };
     EngineInstance.prototype.registerPlugin = function(key, plugin) {
-        this.context.register(key, plugin);
+        if(this.context.hasOwnProperty('register')){
+            log.info('Register method exists');
+        }
+        this.context.registerPlugin(key, plugin);
+        log.info('Finished invoking register method');
     };
     EngineInstance.prototype.getPlugin = function(key) {
-        return this.context.get(key);
+        var plugin = this.context.getPlugin(key);
+        if(!plugin){
+            throw 'Unable to locate plugin with key '+key;
+        }
+        var instance = new plugin();
+        instance.init(this);
+        return instance;
     };
     EngineInstance.prototype.registerWorkflow = function(workflowName, workflowImpl) {
         if (this.workflows.hasOwnProperty(workflowName)) {
@@ -38,7 +57,9 @@ var engine = {};
         if (this.engineInstances[tenantId]) {
             return this.engineInstances[tenantId];
         }
-        return null;
+        log.info('Creating new engine instances');
+        this.engineInstances[tenantId] = new EngineInstance();
+        return this.engineInstances[tenantId];
     };
     engine.extend = function(extensionModule) {
         //An extension module may contain workflows or plugin name spaces
@@ -68,7 +89,7 @@ var engine = {};
             return engine;
         }
         engine = new Engine();
-        application.set(constants.ENGINE, engine);
+        application.put(constants.ENGINE, engine);
         return engine;
     };
     var init = function(tenantId) {};

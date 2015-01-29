@@ -1,24 +1,24 @@
 <module name="es-engine" xmlns="http://wso2.org/projects/jaggery/module.xml">
-	<scripts>
+	<script>
 		<name>constants</name>
 		<path>scripts/constants/constants.js</path>
-	</scripts>
-		<scripts>
+	</script>
+	<script>
 		<name>workflows</name>
 		<path>scripts/workflows/workflows.js</path>
-	</scripts>
-	<scripts>
+	</script>
+	<script>
 		<name>interfaces</name>
 		<path>scripts/interfaces/interfaces.js</path>
-	</scripts>
+	</script>
 	<script>
 		<name>core</name>
 		<path>scripts/core/core.js</path>
 	</script>
-	<scripts>
+	<script>
 		<name>plugins</name>
 		<path>scripts/plugins/plugins.js</path>
-	</scripts>
+	</script>
 	<script>
 		<name>engine</name>
 		<path>scripts/engine/engine.js</path>
