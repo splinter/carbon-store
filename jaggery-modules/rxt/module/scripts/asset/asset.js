@@ -28,7 +28,7 @@
  * @requires Packages.org.wso2.carbon.governance.api.util.GovernanceUtils
  */
 var asset = {};
-(function(asset, core) {
+(function(asset, core,tenant) {
     var log = new Log('rxt.asset');
     var DEFAULT_TIME_STAMP_FIELD = 'overview_createdtime'; //TODO:Move to constants
     var DEFAULT_RECENT_ASSET_COUNT = 5; //TODO: Move to constants
@@ -1493,10 +1493,16 @@ var asset = {};
         extensionMatcher.match(extensionPattern);
         var pathOptions = extensionMatcher.elements() || {};
         var uriOptions = uriMatcher.elements() || {};
+        var domain = tenant.getSuperTenantDomain();//Assume that the tenant domain is not provided
+
+        if(uriOptions.domain){
+            domain = uriOptions.domain;
+        }
+
         //If the type is not metioned then return the path
         if (!pathOptions.type) {
             //Determine if the paths occur within the extensions directory
-            var extensionResPath = '/extensions/assets/' + uriOptions.type + '/themes/' + themeName + '/' + resPath;
+            var extensionResPath = '/extensions/root/'+domain+'/assets/' + uriOptions.type + '/themes/' + themeName + '/' + resPath;
             var resFile = new File(extensionResPath);
             if (resFile.isExists()) {
                 return extensionResPath;
@@ -1505,7 +1511,7 @@ var asset = {};
             return themeResolver.call(themeObj, path);
         }
         //Check if type has a similar path in its extension directory
-        var extensionPath = '/extensions/assets/' + uriOptions.type + '/themes/' + themeName + '/' + pathOptions.root + '/' + pathOptions.suffix;
+        var extensionPath = '/extensions/root/'+domain+'/assets/' + uriOptions.type + '/themes/' + themeName + '/' + pathOptions.root + '/' + pathOptions.suffix;
         var file = new File(extensionPath);
         if (file.isExists()) {
             return extensionPath;
@@ -1515,4 +1521,4 @@ var asset = {};
         var modPath = themeResolver.call(themeObj, extensionPath);
         return modPath;
     };
-}(asset, core))
+}(asset, core,tenant))

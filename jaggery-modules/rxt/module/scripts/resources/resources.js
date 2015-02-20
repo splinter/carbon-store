@@ -27,7 +27,7 @@
  * @requires store
  */
 var resources = {};
-(function(core, resources, artifacts) {
+(function(core, resources, artifacts,tenant) {
     var log = new Log();
     var getRxtExtensionPath = function(type, options) {
         return options.CONFIG_BASE_PATH + options.EXTENSION_PATH + type;
@@ -35,14 +35,20 @@ var resources = {};
     var getAssetScriptPath = function(type, options) {
         return getRxtExtensionPath(type, options) + options.ASSET_SCRIPT_PATH;
     };
-    var getDefaultAssetScriptPath = function(options) {
-        return options.DEFAULT_ASSET_SCRIPT;
+    var getDefaultAssetScriptPath = function(options,tenantId) {
+        //return options.DEFAULT_ASSET_SCRIPT;
+        var domain = tenant.getTenantDomain(tenantId);
+        return '/extensions/root/'+domain+'/assets/default/asset.js';
     };
-    var getDefaultAssetTypeScriptPath = function(options, type) {
-        return '/extensions/assets/' + type + '/asset.js';
+    var getDefaultAssetTypeScriptPath = function(options, type,tenantId) {
+        var domain = tenant.getTenantDomain(tenantId);
+        //return '/extensions/assets/' + type + '/asset.js';
+        return '/extensions/root/'+domain+'/assets/' + type + '/asset.js';
     };
-    var getAssetExtensionPath = function(type){
-        return constants.ASSET_EXTENSION_ROOT+'/'+type;
+    var getAssetExtensionPath = function(type,tenantId){
+        var domain = tenant.getTenantDomain(tenantId);
+        //return constants.ASSET_EXTENSION_ROOT+'/'+type;
+        return '/extensions/root/'+domain+'/assets/'+type;
     };
     var addToConfigs = function(tenantId, type, assetResource) {
         var configs = core.configs(tenantId);
@@ -70,15 +76,15 @@ var resources = {};
         }
         return content;
     };
-    var loadDefaultAssetScript = function(options, type, assetResource) {
-        var content = loadAssetScriptContent(getDefaultAssetScriptPath(options));
+    var loadDefaultAssetScript = function(options, type, assetResource,tenantId) {
+        var content = loadAssetScriptContent(getDefaultAssetScriptPath(options,tenantId));
         if (content) {
             assetResource = evalAssetScript(content, assetResource, 'default', 'default')
         }
         return assetResource;
     };
-    var loadAssetScript = function(options, type, assetResource) {
-        var path = getDefaultAssetTypeScriptPath(options, type);
+    var loadAssetScript = function(options, type, assetResource,tenantId) {
+        var path = getDefaultAssetTypeScriptPath(options, type,tenantId);
         var content = loadAssetScriptContent(path);
         var defConfiguration = assetResource.configure();
         var ref = require('utils').reflection;
@@ -119,23 +125,23 @@ var resources = {};
         }
         return assetResource;
     };
-    var buildDefaultResources = function(options, type, assetResource) {
+    var buildDefaultResources = function(options, type, assetResource,tenantId) {
         var asset = {};
         asset.manager = null;
         asset.renderer = null;
         asset.server = null;
         asset.configure = null;
-        asset = loadDefaultAssetScript(options, type, asset);
+        asset = loadDefaultAssetScript(options, type, asset,tenantId);
         assetResource._default = asset;
         assetResource.configure = asset.configure;
     };
-    var buildAssetResources = function(options, type, assetResource) {
+    var buildAssetResources = function(options, type, assetResource,tenantId) {
         var asset = {};
         asset.manager = null;
         asset.renderer = null;
         asset.server = null;
         asset.configure = assetResource.configure;
-        asset = loadAssetScript(options, type, asset);
+        asset = loadAssetScript(options, type, asset,tenantId);
         assetResource.manager = asset.manager;
         assetResource.renderer = asset.renderer;
         assetResource.server = asset.server;
@@ -147,7 +153,7 @@ var resources = {};
      * @param  Number tenantId The tenant ID
      */
     var loadAssetArtifacts = function(type, tenantId) {
-        var path = getAssetExtensionPath(type);
+        var path = getAssetExtensionPath(type,tenantId);
         artifacts.loadDirectory(path, tenantId, type);
     };
     /**
@@ -172,8 +178,9 @@ var resources = {};
             asset.renderer = null;
             asset.server = null;
             asset.configure = null;
-            buildDefaultResources(options, type, asset);
-            buildAssetResources(options, type, asset);
+            log.info('Building default resources ');
+            buildDefaultResources(options, type, asset,tenantId);
+            buildAssetResources(options, type, asset,tenantId);
             //Perform any rxt mutations
             if (asset.configure) {
                 manager.applyMutator(type, asset.configure());
@@ -209,4 +216,4 @@ var resources = {};
             init(tenantId);
         });
     };
-}(core, resources, artifacts));
+}(core, resources, artifacts,tenant));

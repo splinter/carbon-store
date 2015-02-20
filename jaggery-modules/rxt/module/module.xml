@@ -4,6 +4,10 @@
         <path>scripts/constants/constants.js</path>
     </script>
     <script>
+        <name>tenant</name>
+        <path>scripts/tenant/tenant.js</path>
+    </script>
+    <script>
         <name>core</name>
         <path>scripts/core/core.js</path>
     </script>

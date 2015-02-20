@@ -1,0 +1,11 @@
+<%
+	var log = new Log();
+	var rxtModule = require('rxt').tenant;
+	log.info('### Testing tenant loading changes to assets ###');
+	//var server = require('carbon').server;
+	//var domain = server.tenantDomain({tenantId:1});
+	var domain = rxtModule.getTenantDomain('yuu');
+	log.info(domain);
+
+	log.info('### Done ###');
+%>
