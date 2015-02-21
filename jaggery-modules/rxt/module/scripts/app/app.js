@@ -215,7 +215,7 @@ var app = {};
         return getAppExtensionBasePath(tenanId) + '/' + currentDir.getName() + '/' + getAppExtensionFileName();
     };
     var load = function(tenantId) {
-        var path = getAppExtensionPath(tenantId);
+        var path = getAppExtensionBasePath(tenantId);
         var dir = new File(path);
         //Check if it is a directory and the path exists
         if (!dir.isExists()) {
@@ -240,7 +240,7 @@ var app = {};
         for (var index in files) {
             appExtensionName = files[index].getName();
             //log.info('Located app extension ' + appExtensionName);
-            var appExtensionFilePath = getCurrentAppExtensionFileName(files[index],tenanId);
+            var appExtensionFilePath = getCurrentAppExtensionFileName(files[index],tenantId);
             evalAppScript(appExtensionName, appExtensionFilePath, appResources);
         }
         var app = processAppExtensions(appResources, tenantId);
@@ -313,7 +313,7 @@ var app = {};
         app.addPageEndpoints(pageEndpoints);
         map[extName].loaded = true;
         //Load artifacts
-        loadAppExtensionArtifacts(extName,tenanId);
+        loadAppExtensionArtifacts(extName,tenantId);
         //Load the server configurations
         loadServerConfigs(tenantId, serverCbResult.configs || {},serverCbResult);
         if(log.isDebugEnabled()){

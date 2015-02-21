@@ -16,18 +16,26 @@
  *  under the License.
  *
  */
-	
 var tenant = {};
 (function() {
-	/**
-	 * Returns the tenant domain given the tenant id
-	 * @param  {Number} tenantId An integer tenant id
-	 * @return {String}          The tenant domain
-	 */
+    var tryParseInt = function(value) {
+        if (typeof value !== 'string') {
+            return value;
+        }
+        value = value || '0';
+        try {
+            return parseInt(value);
+        } catch (e) {
+            return 0;
+        }
+    };
+    /**
+     * Returns the tenant domain given the tenant id
+     * @param  {Number} tenantId An integer tenant id
+     * @return {String}          The tenant domain
+     */
     tenant.getTenantDomain = function(tenantId) {
-    	if(typeof tenantId !=='string'){
-    		throw 'The provided tenantId must be an integer';
-    	}
+        tenantId = tryParseInt(tenantId);
         var server = require('carbon').server;
         var domain = server.tenantDomain({
             tenantId: tenantId
@@ -37,8 +45,7 @@ var tenant = {};
     tenant.getTenantId = function(tenantDomain) {
         throw 'getId method not implemented';
     };
-
-    tenant.getSuperTenantDomain = function(){
-    	return 'carbon.super';//Do not hard code this
+    tenant.getSuperTenantDomain = function() {
+        return 'carbon.super'; //Do not hard code this
     };
 }(tenant));
