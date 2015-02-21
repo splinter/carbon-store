@@ -28,7 +28,7 @@
  * @requires utils
  */
 var app = {};
-(function(app, core, artifacts) {
+(function(app, core, artifacts,tenant) {
     var log = new Log('app-core');
     /**
      * Represents a set of endpoints
@@ -204,25 +204,27 @@ var app = {};
         }
         return page;
     };
-    var getAppExtensionBasePath = function() {
-        return '/extensions/app';
+    var getAppExtensionBasePath = function(tenantId) {
+        var domain = tenant.getTenantDomain(tenantId);
+        return '/extensions/root/'+domain+'/app';
     };
     var getAppExtensionFileName = function() {
         return 'app.js';
     };
-    var getCurrentAppExtensionFileName = function(currentDir) {
-        return getAppExtensionBasePath() + '/' + currentDir.getName() + '/' + getAppExtensionFileName();
+    var getCurrentAppExtensionFileName = function(currentDir,tenanId) {
+        return getAppExtensionBasePath(tenanId) + '/' + currentDir.getName() + '/' + getAppExtensionFileName();
     };
     var load = function(tenantId) {
-        var dir = new File(getAppExtensionBasePath());
+        var path = getAppExtensionPath(tenantId);
+        var dir = new File(path);
         //Check if it is a directory and the path exists
         if (!dir.isExists()) {
-            log.warn('The app extension directory ' + getAppExtensionBasePath() + ' does not exist');
-            throw 'The app extension directory ' + getAppExtensionBasePath() + ' does not exist';
+            log.warn('The app extension directory ' + path + ' does not exist');
+            throw 'The app extension directory ' + path + ' does not exist';
         }
         if (!dir.isDirectory()) {
-            log.warn('The app extension path ' + getAppExtensionBasePath() + ' does not point to a directory');
-            throw 'The app extension path ' + getAppExtensionBasePath() + ' does not point to a directory';
+            log.warn('The app extension path ' + path + ' does not point to a directory');
+            throw 'The app extension path ' + path + ' does not point to a directory';
         }
         loadAppExtensions(dir, tenantId);
     };
@@ -238,7 +240,7 @@ var app = {};
         for (var index in files) {
             appExtensionName = files[index].getName();
             //log.info('Located app extension ' + appExtensionName);
-            var appExtensionFilePath = getCurrentAppExtensionFileName(files[index]);
+            var appExtensionFilePath = getCurrentAppExtensionFileName(files[index],tenanId);
             evalAppScript(appExtensionName, appExtensionFilePath, appResources);
         }
         var app = processAppExtensions(appResources, tenantId);
@@ -252,11 +254,11 @@ var app = {};
             items[index].owner = extName;
         }
     };
-    var getAppExtensionPath = function(extName) {
-        return getAppExtensionBasePath() + '/' + extName;
+    var getAppExtensionPath = function(extName,tenantId) {
+        return getAppExtensionBasePath(tenantId) + '/' + extName;
     };
-    var loadAppExtensionArtifacts = function(extName) {
-        var path = getAppExtensionPath(extName);
+    var loadAppExtensionArtifacts = function(extName,tenantId) {
+        var path = getAppExtensionPath(extName,tenantId);
         artifacts.loadDirectory(path, -1234); //TODO:We only support loading artifacts for super tenant
     };
     var loadServerConfigs = function(tenantId, serverConfigs,serverCb) {
@@ -311,7 +313,7 @@ var app = {};
         app.addPageEndpoints(pageEndpoints);
         map[extName].loaded = true;
         //Load artifacts
-        loadAppExtensionArtifacts(extName);
+        loadAppExtensionArtifacts(extName,tenanId);
         //Load the server configurations
         loadServerConfigs(tenantId, serverCbResult.configs || {},serverCbResult);
         if(log.isDebugEnabled()){
@@ -944,6 +946,11 @@ var app = {};
         uriMatcher.match(uriPattern) ||uriMatcher.match(tenantedUriPattern);
         var extensionOptions = extensionMatcher.elements() || {};
         var uriOptions = uriMatcher.elements() || {};
+        var domain = tenant.getSuperTenantDomain();//Assume that the tenant domain is not provided
+
+        if(uriOptions.domain){
+            domain = uriOptions.domain;
+        }
         //Determine if the path does not reference an app extension
         if (!extensionOptions.name) {
             //Determine if the uri references an extension page even though the resource does not reference one
@@ -960,7 +967,7 @@ var app = {};
             if (!endpoint) {
                 return null;
             }
-            var extensionResourcePath = '/extensions/app/' + endpoint.owner + '/themes/' + themeName + '/' + resPath;
+            var extensionResourcePath = '/extensions/root/'+domain+'/app/' + endpoint.owner + '/themes/' + themeName + '/' + resPath;
             //Check if the resource exists
             var extensionResource = new File(extensionResourcePath);
             if (extensionResource.isExists()) {
@@ -970,7 +977,7 @@ var app = {};
             return null;
         }
         //The resource path references an app extension 
-        var extensionPath = '/extensions/app/' + extensionOptions.name + '/themes/' + themeName + '/' + extensionOptions.root + '/' + extensionOptions.suffix;
+        var extensionPath = '/extensions/root/'+domain+'/app/' + extensionOptions.name + '/themes/' + themeName + '/' + extensionOptions.root + '/' + extensionOptions.suffix;
         var extensionFile = new File(extensionPath);
         if (extensionFile.isExists()) {
             return extensionPath;
@@ -980,4 +987,4 @@ var app = {};
         var themeContextPath = themeResolver.call(themeObj, extensionPath);
         return themeContextPath;
     };
-}(app, core, artifacts));
+}(app, core, artifacts,tenant));
