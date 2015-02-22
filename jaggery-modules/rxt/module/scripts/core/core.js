@@ -1039,7 +1039,7 @@ var core = {};
         var user = require('store').user;
         var userDetails = server.current(session);
         if (!userDetails) {
-            log.debug('Obtaining anon app context ');
+            log.info('Obtaining anon app context ');
             return this.createAnonAppContext(session, tenantID);
         } else {
             return this.createUserAppContext(session);

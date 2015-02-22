@@ -609,7 +609,7 @@ var app = {};
         }
         var pageHandlers = extensionResource.pageHandlers;
         if (!pageHandlers) {
-            log.warn('There are no pageHandlers defined for tenant ' + ctx.tenanId);
+            log.warn('There are no pageHandlers defined for tenant ' + ctx.tenantId);
             return true;
         }
         ctx.req = req;
@@ -723,7 +723,7 @@ var app = {};
             log.warn('Could not locate the endpoint ' + url);
             return null;
         }
-        return getAppExtensionBasePath() + '/' + endpoint.owner + '/pages/' + endpoint.path;
+        return getAppExtensionBasePath(tenantId) + '/' + endpoint.owner + '/pages/' + endpoint.path;
     };
     /**
      * Returns endpoint details of an api registered with the extensible application
@@ -780,7 +780,7 @@ var app = {};
             log.warn('Could not locate the endpoint ' + url);
             return null;
         }
-        return getAppExtensionBasePath() + '/' + endpoint.owner + '/apis/' + endpoint.path;
+        return getAppExtensionBasePath(tenantId) + '/' + endpoint.owner + '/apis/' + endpoint.path;
     };
     /**
      * Returns details on a particular feature of the extensible application
@@ -938,7 +938,7 @@ var app = {};
         path = '/' + path;
         var uriMatcher = new URIMatcher(request.getRequestURI());
         var extensionMatcher = new URIMatcher(path);
-        var extensionPattern = '/{root}/extensions/app/{name}/{+suffix}';
+        var extensionPattern = '/{root}/extensions/root/{domain}/app/{name}/{+suffix}';
         var uriPattern = constants.APP_PAGE_URL_PATTERN;// '/{context}/pages/{+suffix}';
         var tenantedUriPattern = constants.APP_TENANT_PAGE_URL_PATTERN;//'/{context}/t/{domain}/pages/{+suffix}';
 

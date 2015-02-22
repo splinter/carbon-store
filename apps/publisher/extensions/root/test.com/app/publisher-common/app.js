@@ -1,4 +1,3 @@
-<%
 /*
  *  Copyright (c) 2005-2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -17,16 +16,20 @@
  *  under the License.
  *
  */
-
-print('Default asset api');
-var matcher = new URIMatcher(request.getRequestURI());
-var endpoint = '/{context}/api/asset/{+id}';
-log.info('Looking for sub routes');
-if (matcher.match(endpoint)) {
-    var id = uriMatcher.elements().id;
-    print('Id ' + id);
-}
-else {
-    print('No id !!');
-}
-%>
+app.server = function(ctx) {
+    return {
+        endpoints: {
+            pages: [{
+                title: 'Publisher | Splash page',
+                url: 'splash',
+                path: 'splash.jag'
+            }]
+        },
+        configs: {
+            landingPage: '/asts/gadget/list',
+            disabledAssets: ['ebook', 'api', 'wsdl', 'service','policy','proxy','schema','sequence','servicex','uri','wadl','endpoint']
+        },
+        onLoadedServerConfigs:function(configs){
+        }
+    }
+};

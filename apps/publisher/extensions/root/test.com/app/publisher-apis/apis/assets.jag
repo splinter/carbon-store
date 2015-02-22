@@ -20,12 +20,11 @@
  Filename: assets.jag
 
  */
-var log = new Log('statistics_api_router');
+var log = new Log('assets_api_router');
 var matcher = new URIMatcher(request.getRequestURI());
 var apiEndpoint = '/{context}/apis/{+suffix}';
 var asset = require('rxt').asset;
 var req = require('utils').request;
-var constants = require('rxt').constants;
 var responseProcessor = require('utils').response;
 var response = response;
 response.contentType = 'application/json';
@@ -61,7 +60,7 @@ var handleApiEndpoint = function (request, session, uriParams) {
         var endpoint;
         for (var index in endPoints) {
             if (endPoints[index].url == page) {
-                endpoint = asset.getAssetApiEndpoint(type, endPoints[index].path);
+                endpoint = asset.getAssetApiEndpoint(type, endPoints[index].path,session);
             }
         }
         if (endpoint) {

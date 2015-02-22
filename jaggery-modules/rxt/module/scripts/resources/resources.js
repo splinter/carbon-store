@@ -178,7 +178,6 @@ var resources = {};
             asset.renderer = null;
             asset.server = null;
             asset.configure = null;
-            log.info('Building default resources ');
             buildDefaultResources(options, type, asset,tenantId);
             buildAssetResources(options, type, asset,tenantId);
             //Perform any rxt mutations

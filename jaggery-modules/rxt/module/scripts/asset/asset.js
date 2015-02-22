@@ -1422,17 +1422,19 @@ var asset = {};
         var endpoints = this.getAssetEndpoints(session, type, tenantId);
         return endpoints['pages'] || [];
     };
-    asset.getAssetExtensionPath = function(type) {
-        return '/extensions/assets/' + type;
+    asset.getAssetExtensionPath = function(type,tenantId) {
+        var domain = tenant.getTenantDomain(tenantId);
+        return '/extensions/rooot/'+domain+'/assets/' + type;
     };
-    asset.getAssetDefaultPath = function() {
-        return '/extensions/assets/default';
+    asset.getAssetDefaultPath = function(tenantId) {
+        var domain = tenant.getTenantDomain(tenantId);
+        return '/extensions/root/'+domain+'/assets/default';
     };
-    asset.getAssetApiDirPath = function(type) {
-        return asset.getAssetExtensionPath(type) + '/apis';
+    asset.getAssetApiDirPath = function(type,tenantId) {
+        return asset.getAssetExtensionPath(type,tenantId) + '/apis';
     };
-    asset.getAssetPageDirPath = function(type) {
-        return asset.getAssetExtensionPath(type) + '/pages';
+    asset.getAssetPageDirPath = function(type,tenantId) {
+        return asset.getAssetExtensionPath(type,tenantId) + '/pages';
     };
     asset.getAssetPageUrl = function(type) {
         return asset.getBaseUrl() + type;
@@ -1446,12 +1448,14 @@ var asset = {};
      * @param  {String} endpointName An endpoint name
      * @return {String}              The path to the controller
      */
-    asset.getAssetApiEndpoint = function(type, endpointName) {
+    asset.getAssetApiEndpoint = function(type, endpointName,session) {
+        var server = require('store').server;
+        var tenantId = server.current(session).tenantId;
         //Check if the path exists within the asset extension path
-        var endpointPath = asset.getAssetApiDirPath(type) + '/' + endpointName;
+        var endpointPath = asset.getAssetApiDirPath(type,tenantId) + '/' + endpointName;
         var endpoint = new File(endpointPath);
         if (!endpoint.isExists()) {
-            endpointPath = asset.getAssetDefaultPath() + '/apis/' + endpointName;
+            endpointPath = asset.getAssetDefaultPath(tenantId) + '/apis/' + endpointName;
             endpoint = new File(endpointPath);
             if (!endpoint.isExists()) {
                 endpointPath = '';
@@ -1465,12 +1469,14 @@ var asset = {};
      * @param  {String} endpointName An endpoint name
      * @return {String}              The path to the controller
      */
-    asset.getAssetPageEndpoint = function(type, endpointName) {
+    asset.getAssetPageEndpoint = function(type, endpointName,session) {
+        var server = require('store').server;
+        var tenantId = server.current(session).tenantId;
         //Check if the path exists within the asset extension path
-        var endpointPath = asset.getAssetPageDirPath(type) + '/' + endpointName;
+        var endpointPath = asset.getAssetPageDirPath(type,tenantId) + '/' + endpointName;
         var endpoint = new File(endpointPath);
         if (!endpoint.isExists()) {
-            endpointPath = asset.getAssetDefaultPath() + '/pages/' + endpointName;
+            endpointPath = asset.getAssetDefaultPath(tenantId) + '/pages/' + endpointName;
             endpoint = new File(endpointPath);
             if (!endpoint.isExists()) {
                 endpointPath = '';
@@ -1487,7 +1493,7 @@ var asset = {};
         var extensionMatcher = new URIMatcher(path);
         //TODO: Use the constants
         var uriPattern = '/{context}/asts/{type}/{+options}';
-        var extensionPattern = '/{root}/extensions/assets/{type}/{+suffix}';
+        var extensionPattern = '/{root}/extensions/root/{domain}/assets/{type}/{+suffix}';
         var tenantedUriPattern = '/{context}/t/{domain}/asts/{type}/{+suffix}';
         uriMatcher.match(uriPattern) || uriMatcher.match(tenantedUriPattern); //TODO check with samples
         extensionMatcher.match(extensionPattern);
@@ -1498,7 +1504,6 @@ var asset = {};
         if(uriOptions.domain){
             domain = uriOptions.domain;
         }
-
         //If the type is not metioned then return the path
         if (!pathOptions.type) {
             //Determine if the paths occur within the extensions directory

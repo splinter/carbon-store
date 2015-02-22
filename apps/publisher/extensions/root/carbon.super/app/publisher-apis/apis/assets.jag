@@ -60,7 +60,7 @@ var handleApiEndpoint = function (request, session, uriParams) {
         var endpoint;
         for (var index in endPoints) {
             if (endPoints[index].url == page) {
-                endpoint = asset.getAssetApiEndpoint(type, endPoints[index].path);
+                endpoint = asset.getAssetApiEndpoint(type, endPoints[index].path,session);
             }
         }
         if (endpoint) {
