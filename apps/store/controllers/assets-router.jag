@@ -45,7 +45,7 @@ var handleApiEndpoint = function (request, session, uriParams) {
     var endpoint;
     for (var index in endPoints) {
         if (endPoints[index].url == page) {
-            endpoint = asset.getAssetApiEndpoint(type, endPoints[index].path);
+            endpoint = asset.getAssetApiEndpoint(type, endPoints[index].path,session);
         }
     }
     if (endpoint) {
@@ -66,12 +66,16 @@ var handlePageEndpoint = function (request, session, uriParams) {
     var user = server.current(session);
     var endPoints = asset.getAssetPageEndpoints(session, type);
     var endpoint;
+    var explicitTenantDomain;
+    explicitTenantDomain = uriParams.domain || rxt.tenant.getSuperTenantDomain();
     for (var index in endPoints) {
         if (endPoints[index].url == page) {
-            endpoint = asset.getAssetPageEndpoint(type, endPoints[index].path);
+            log.info('Explicit tenant domain '+explicitTenantDomain);
+            endpoint = asset.getAssetPageEndpoint(type, endPoints[index].path,session,explicitTenantDomain);
         }
     }
     if (endpoint) {
+        log.info('Endpoint: '+endpoint);
         request.getMappedPath = mapper(endpoint);
         include(endpoint);
     }

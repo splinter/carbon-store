@@ -43,7 +43,11 @@ var tenant = {};
         return domain;
     };
     tenant.getTenantId = function(tenantDomain) {
-        throw 'getId method not implemented';
+        var server = require('carbon').server;
+        var tenatId = server.tenantId({
+            domain:tenantDomain
+        });
+        return tenatId;
     };
     tenant.getSuperTenantDomain = function() {
         return 'carbon.super'; //Do not hard code this

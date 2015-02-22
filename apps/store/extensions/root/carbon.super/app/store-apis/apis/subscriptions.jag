@@ -74,7 +74,7 @@ var handleApiEndpoint = function(request, session, uriParams) {
                 if(log.isDebugEnabled()){
                     log.debug('Match '+endPoints[index].path);
                 }
-                endpoint = asset.getAssetApiEndpoint(type, endPoints[index].path);
+                endpoint = asset.getAssetApiEndpoint(type, endPoints[index].path,session);
                 if(log.isDebugEnabled()){
                     log.debug(endpoint);
                 }

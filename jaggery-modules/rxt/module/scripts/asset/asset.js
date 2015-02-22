@@ -1469,9 +1469,23 @@ var asset = {};
      * @param  {String} endpointName An endpoint name
      * @return {String}              The path to the controller
      */
-    asset.getAssetPageEndpoint = function(type, endpointName,session) {
+    asset.getAssetPageEndpoint = function(type, endpointName,session,explicitTenantDomain) {
         var server = require('store').server;
-        var tenantId = server.current(session).tenantId;
+        var user = server.current(session);
+        var tenantId;
+        if(!user){
+            log.info('Asset page resoultion defaulting to explicit tenant domain :'+explicitTenantDomain);
+            //Determine if the explicit tenant domain has been provided,if not we cannot
+            //proceed
+            if(!explicitTenantDomain){
+                throw 'Unable to resolve asset page endpoint details as it is anon user without a explicitTenantDomain';
+            }
+
+            tenantId = tenant.getTenantId(explicitTenantDomain);
+        }
+        else{
+            tenantId = server.current(session).tenantId;
+        }
         //Check if the path exists within the asset extension path
         var endpointPath = asset.getAssetPageDirPath(type,tenantId) + '/' + endpointName;
         var endpoint = new File(endpointPath);
