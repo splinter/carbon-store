@@ -48,7 +48,7 @@ var init = function(options) {
         CommonUtil.addRxtConfigs(system.registry.getChrootedRegistry("/_system/governance"), tenantId);
         um.authorizeRole(carbon.user.anonRole, GovernanceConstants.RXT_CONFIGS_PATH, carbon.registry.actions.GET);
         log.debug('TENANT CREATED');
-        addLifecycles(system);
+        addLifecycles(system,tenantId);
     });
     event.on('tenantLoad', function(tenantId) {
         var store = require('store'),
@@ -92,9 +92,15 @@ var configs = function(tenantId) {
         registry = server.systemRegistry(tenantId);
     return JSON.parse(registry.content(PUBLISHER_CONFIG_PATH));
 };
-var addLifecycles = function(registry) {
+var addLifecycles = function(registry,tenantId) {
+
+    //Determine the tenant domain
+    var rxt = require('rxt');
+    var domain = rxt.tenant.getTenantDomain(tenantId);
+    var lcPath = '/extensions/root/'+domain+'/lifecycles';
+
     var lc,
-        files = new File('/extensions/lifecycles'),
+        files = new File(lcPath),
         rootReg = registry.registry,
         configReg = rootReg.getChrootedRegistry('/_system/config'),
         CommonUtil = Packages.org.wso2.carbon.governance.lcm.util.CommonUtil;
