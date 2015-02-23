@@ -38,7 +38,7 @@ var resources = {};
     var getDefaultAssetScriptPath = function(options,tenantId) {
         //return options.DEFAULT_ASSET_SCRIPT;
         var domain = tenant.getTenantDomain(tenantId);
-        return '/extensions/'+tenant.getTenantExtensionRoot()+'/'+domain+'/assets/default/asset.js';
+        return '/extensions/'+tenant.getTenantExtensionRoot()+'/'+domain+'/assets/'+core.getDefaultAssetType()+'/asset.js';
     };
     var getDefaultAssetTypeScriptPath = function(options, type,tenantId) {
         var domain = tenant.getTenantDomain(tenantId);
@@ -77,14 +77,17 @@ var resources = {};
         return content;
     };
     var loadDefaultAssetScript = function(options, type, assetResource,tenantId) {
-        var content = loadAssetScriptContent(getDefaultAssetScriptPath(options,tenantId));
+        var path = getDefaultAssetScriptPath(options,tenantId);
+        path = core.resolveAssetPath(path);
+        var content = loadAssetScriptContent(path);
         if (content) {
-            assetResource = evalAssetScript(content, assetResource, 'default', 'default')
+            assetResource = evalAssetScript(content, assetResource,core.getDefaultAssetType(),core.getDefaultAssetType());
         }
         return assetResource;
     };
     var loadAssetScript = function(options, type, assetResource,tenantId) {
         var path = getDefaultAssetTypeScriptPath(options, type,tenantId);
+        path = core.resolveAssetPath(path);
         var content = loadAssetScriptContent(path);
         var defConfiguration = assetResource.configure();
         var ref = require('utils').reflection;

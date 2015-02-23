@@ -893,6 +893,68 @@ var core = {};
     core.getAssetSubscriptionSpace = function(type) {
         return constants.SUBSCRIPTIONS_PATH + (type ? '/' + type : '');
     };
+    core.getDefaultAssetType = function(){
+        return 'asset-commons';
+    };
+    core.resolveAssetPath = function(path){
+        var assetResourcePattern = '/extensions/'+tenant.getTenantExtensionRoot()+'/{domain}/assets/{type}/{+suffix}';
+        var assetBasePattern = '/extensions/'+tenant.getTenantExtensionRoot()+'/{domain}/assets/{type}';
+        var matcher = new URIMatcher(path);
+        var options;
+        matcher.match(assetResourcePattern)||matcher.match(assetBasePattern);
+        options = matcher.elements();
+        if((!options.type)||(!options.domain)){
+            log.warn('Asset resource path resolution detected anomaly for path: '+path+', better call saul :)');
+            return path;
+        }
+        //Check if the path appears in the tenant directory
+        var resource = new File(path);
+
+        if(resource.isExists()){
+            log.info('extensions/tenants qualified asset resource path '+path);
+            return path;
+        }
+        //Check if the path appears in top level assets directory
+        var rootAssetsPath = '/extensions/assets/'+options.type+'/'+(options.suffix?options.suffix:'');
+        var rootAssetResource = new File(rootAssetsPath);
+        if(rootAssetResource.isExists()){
+            log.info('extensions/assets qualified asset resource path '+rootAssetsPath);
+            return rootAssetsPath;
+        }
+        log.warn('Cannot match path to tenant qualified or top level ASSET resource : '+path);
+        return path;
+    };
+    core.resolveAppPath = function(path){
+        log.info('Resolving APP path '+path);
+        var appResourcePattern = '/extensions/'+tenant.getTenantExtensionRoot()+'/{domain}/app/{name}/{+suffix}';
+        var appBasePattern = '/extensions/'+tenant.getTenantExtensionRoot()+'/{domain}/app';
+        //var appBaseNamePattern = '/extensions/'+tenant.getTenantExtensionRoot()+'/{domain}/app/{name}';
+        var options;
+        var matcher = new URIMatcher(path);
+        matcher.match(appResourcePattern)||matcher.match(appBasePattern);
+        options = matcher.elements();
+        if(!options){
+            log.warn('Asset resource path resolution detected anomaly for path: '+path+', better call saul :)');
+            return path;
+        }
+        //Check if the path points to a resource in the tenant directory
+        var resource  = new File(path);
+
+        if(resource.isExists()){
+            log.info('extensions/tenants qualified app resource path '+path);
+            return path;
+        }
+        //Check if the path appears in top level app directory
+        var rootAppPath = '/extensions/app/'+(options.name?options.name+'/':'')+(options.suffix?options.suffix:'');
+        var rootAppResource = new File(rootAppPath);
+        log.info('Looking for app extension in '+rootAppPath);
+        if(rootAppResource.isExists()){
+            log.info('extensions/app qualified app resource path '+rootAppPath);
+            return rootAppPath;
+        }
+        log.warn('Cannot match path to tenant qualified or top level APP resource : '+path);
+        return path;
+    };
     /**
      * Initializes the logic which loads the RXT definitions and creates the RxtManagers
      */

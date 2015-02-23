@@ -130,7 +130,7 @@ var robot = function () {
      */
     function loadLifeCycle(lifecycleName, map) {
         var rxt = require('rxt');
-        var file = new File('/extensions/'+rxt.tenant.getTenantExtensionRoot()+'/carbon.super/lifecycles/' + lifecycleName + '.xml');
+        var file = new File('/extensions/lifecycles/' + lifecycleName + '.xml');
         file.open('r');
         var data = file.readAll();
         file.close();

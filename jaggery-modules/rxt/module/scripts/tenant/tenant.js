@@ -63,5 +63,5 @@ var tenant = {};
     };
     tenant.getTenantExtensionRoot = function(){
         return "tenants";
-    }
+    };
 }(tenant));

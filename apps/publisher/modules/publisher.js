@@ -97,7 +97,8 @@ var addLifecycles = function(registry,tenantId) {
     //Determine the tenant domain
     var rxt = require('rxt');
     var domain = rxt.tenant.getTenantDomain(tenantId);
-    var lcPath = '/extensions/'+rxt.tenant.getTenantExtensionRoot()+'/'+domain+'/lifecycles';
+    //TODO: We need to try and load lifecycles from tenant domain extension directory /extensions/tenants/{domain}/lifecycles
+    var lcPath = '/extensions/'+rxt.tenant.getTenantExtensionRoot()+'/lifecycles';
 
     var lc,
         files = new File(lcPath),

@@ -216,6 +216,7 @@ var app = {};
     };
     var load = function(tenantId) {
         var path = getAppExtensionBasePath(tenantId);
+        path = core.resolveAppPath(path);
         var dir = new File(path);
         //Check if it is a directory and the path exists
         if (!dir.isExists()) {
@@ -241,6 +242,7 @@ var app = {};
             appExtensionName = files[index].getName();
             //log.info('Located app extension ' + appExtensionName);
             var appExtensionFilePath = getCurrentAppExtensionFileName(files[index],tenantId);
+            appExtensionFilePath = core.resolveAppPath(appExtensionFilePath);
             evalAppScript(appExtensionName, appExtensionFilePath, appResources);
         }
         var app = processAppExtensions(appResources, tenantId);
