@@ -18,7 +18,7 @@ var ASSETS_EXT_PATH = '/extensions/assets/';
 var TENANT_PUBLISHER = 'tenant.publisher';
 var log = new Log('modules.publisher');
 var utility = require('/modules/utility.js').rxt_utility();
-var SUPER_TENANT = -1234;
+var SUPER_TENANT = require('rxt').tenant.getSuperTenantId();
 var init = function(options) {
     var event = require('event');
     event.on('tenantCreate', function(tenantId) {
@@ -97,7 +97,7 @@ var addLifecycles = function(registry,tenantId) {
     //Determine the tenant domain
     var rxt = require('rxt');
     var domain = rxt.tenant.getTenantDomain(tenantId);
-    var lcPath = '/extensions/root/'+domain+'/lifecycles';
+    var lcPath = '/extensions/'+rxt.tenant.getTenantExtensionRoot()+'/'+domain+'/lifecycles';
 
     var lc,
         files = new File(lcPath),

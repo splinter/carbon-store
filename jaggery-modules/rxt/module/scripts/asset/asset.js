@@ -1424,11 +1424,11 @@ var asset = {};
     };
     asset.getAssetExtensionPath = function(type,tenantId) {
         var domain = tenant.getTenantDomain(tenantId);
-        return '/extensions/rooot/'+domain+'/assets/' + type;
+        return '/extensions/'+tenant.getTenantExtensionRoot()+'/'+domain+'/assets/' + type;
     };
     asset.getAssetDefaultPath = function(tenantId) {
         var domain = tenant.getTenantDomain(tenantId);
-        return '/extensions/root/'+domain+'/assets/default';
+        return '/extensions/'+tenant.getTenantExtensionRoot()+'/'+domain+'/assets/default';
     };
     asset.getAssetApiDirPath = function(type,tenantId) {
         return asset.getAssetExtensionPath(type,tenantId) + '/apis';
@@ -1507,7 +1507,7 @@ var asset = {};
         var extensionMatcher = new URIMatcher(path);
         //TODO: Use the constants
         var uriPattern = '/{context}/asts/{type}/{+options}';
-        var extensionPattern = '/{root}/extensions/root/{domain}/assets/{type}/{+suffix}';
+        var extensionPattern = '/{root}/extensions/'+tenant.getTenantExtensionRoot()+'/{domain}/assets/{type}/{+suffix}';
         var tenantedUriPattern = '/{context}/t/{domain}/asts/{type}/{+suffix}';
         uriMatcher.match(uriPattern) || uriMatcher.match(tenantedUriPattern); //TODO check with samples
         extensionMatcher.match(extensionPattern);
@@ -1521,7 +1521,7 @@ var asset = {};
         //If the type is not metioned then return the path
         if (!pathOptions.type) {
             //Determine if the paths occur within the extensions directory
-            var extensionResPath = '/extensions/root/'+domain+'/assets/' + uriOptions.type + '/themes/' + themeName + '/' + resPath;
+            var extensionResPath = '/extensions/'+tenant.getTenantExtensionRoot()+'/'+domain+'/assets/' + uriOptions.type + '/themes/' + themeName + '/' + resPath;
             var resFile = new File(extensionResPath);
             if (resFile.isExists()) {
                 return extensionResPath;
@@ -1530,7 +1530,7 @@ var asset = {};
             return themeResolver.call(themeObj, path);
         }
         //Check if type has a similar path in its extension directory
-        var extensionPath = '/extensions/root/'+domain+'/assets/' + uriOptions.type + '/themes/' + themeName + '/' + pathOptions.root + '/' + pathOptions.suffix;
+        var extensionPath = '/extensions/'+tenant.getTenantExtensionRoot()+'/'+domain+'/assets/' + uriOptions.type + '/themes/' + themeName + '/' + pathOptions.root + '/' + pathOptions.suffix;
         var file = new File(extensionPath);
         if (file.isExists()) {
             return extensionPath;

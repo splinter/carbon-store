@@ -55,10 +55,13 @@ var tenant = {};
     };
     tenant.getSuperTenantId = function(){
         var server = require('carbon').server;
-        return server.superTenant.tenatId;
+        return server.superTenant.tenantId;
     };
     tenant.superTenant = function(){
         var server = require('carbon').server;
         return server.superTenant;
     };
+    tenant.getTenantExtensionRoot = function(){
+        return "tenants";
+    }
 }(tenant));

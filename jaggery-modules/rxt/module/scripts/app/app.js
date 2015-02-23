@@ -206,7 +206,7 @@ var app = {};
     };
     var getAppExtensionBasePath = function(tenantId) {
         var domain = tenant.getTenantDomain(tenantId);
-        return '/extensions/root/'+domain+'/app';
+        return '/extensions/'+tenant.getTenantExtensionRoot()+'/'+domain+'/app';
     };
     var getAppExtensionFileName = function() {
         return 'app.js';
@@ -259,7 +259,7 @@ var app = {};
     };
     var loadAppExtensionArtifacts = function(extName,tenantId) {
         var path = getAppExtensionPath(extName,tenantId);
-        artifacts.loadDirectory(path, -1234); //TODO:We only support loading artifacts for super tenant
+        artifacts.loadDirectory(path,tenant.getSuperTenantId()); //TODO:We only support loading artifacts for super tenant
     };
     var loadServerConfigs = function(tenantId, serverConfigs,serverCb) {
         var userMod = require('store').user; //Obtain the configurations for the tenant
@@ -512,7 +512,7 @@ var app = {};
         var server = require('store').server;
         var user = server.current(session);
         //Assume that there is no logged in user
-        var tenantId = -1234; //TODO: Replace this with constants.DEFAULT_TENANT
+        var tenantId = tenant.getSuperTenantId(); 
         if (user) {
             tenantId = user.tenantId;
         }
@@ -668,7 +668,7 @@ var app = {};
      * @todo: Remove this method
      */
     app.force = function() {
-        init(-1234);
+        init(tenant.getSuperTenantId());
     }
     /**
      * Returns details about a page endpoint registered for the extensible application
@@ -938,7 +938,7 @@ var app = {};
         path = '/' + path;
         var uriMatcher = new URIMatcher(request.getRequestURI());
         var extensionMatcher = new URIMatcher(path);
-        var extensionPattern = '/{root}/extensions/root/{domain}/app/{name}/{+suffix}';
+        var extensionPattern = '/{root}/extensions/'+tenant.getTenantExtensionRoot()+'/{domain}/app/{name}/{+suffix}';
         var uriPattern = constants.APP_PAGE_URL_PATTERN;// '/{context}/pages/{+suffix}';
         var tenantedUriPattern = constants.APP_TENANT_PAGE_URL_PATTERN;//'/{context}/t/{domain}/pages/{+suffix}';
 
@@ -967,7 +967,7 @@ var app = {};
             if (!endpoint) {
                 return null;
             }
-            var extensionResourcePath = '/extensions/root/'+domain+'/app/' + endpoint.owner + '/themes/' + themeName + '/' + resPath;
+            var extensionResourcePath = '/extensions/'+tenant.getTenantExtensionRoot()+'/'+domain+'/app/' + endpoint.owner + '/themes/' + themeName + '/' + resPath;
             //Check if the resource exists
             var extensionResource = new File(extensionResourcePath);
             if (extensionResource.isExists()) {
@@ -977,7 +977,7 @@ var app = {};
             return null;
         }
         //The resource path references an app extension 
-        var extensionPath = '/extensions/root/'+domain+'/app/' + extensionOptions.name + '/themes/' + themeName + '/' + extensionOptions.root + '/' + extensionOptions.suffix;
+        var extensionPath = '/extensions/'+tenant.getTenantExtensionRoot()+'/'+domain+'/app/' + extensionOptions.name + '/themes/' + themeName + '/' + extensionOptions.root + '/' + extensionOptions.suffix;
         var extensionFile = new File(extensionPath);
         if (extensionFile.isExists()) {
             return extensionPath;

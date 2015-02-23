@@ -38,17 +38,17 @@ var resources = {};
     var getDefaultAssetScriptPath = function(options,tenantId) {
         //return options.DEFAULT_ASSET_SCRIPT;
         var domain = tenant.getTenantDomain(tenantId);
-        return '/extensions/root/'+domain+'/assets/default/asset.js';
+        return '/extensions/'+tenant.getTenantExtensionRoot()+'/'+domain+'/assets/default/asset.js';
     };
     var getDefaultAssetTypeScriptPath = function(options, type,tenantId) {
         var domain = tenant.getTenantDomain(tenantId);
         //return '/extensions/assets/' + type + '/asset.js';
-        return '/extensions/root/'+domain+'/assets/' + type + '/asset.js';
+        return '/extensions/'+tenant.getTenantExtensionRoot()+'/'+domain+'/assets/' + type + '/asset.js';
     };
     var getAssetExtensionPath = function(type,tenantId){
         var domain = tenant.getTenantDomain(tenantId);
         //return constants.ASSET_EXTENSION_ROOT+'/'+type;
-        return '/extensions/root/'+domain+'/assets/'+type;
+        return '/extensions/'+tenant.getTenantExtensionRoot()+'/'+domain+'/assets/'+type;
     };
     var addToConfigs = function(tenantId, type, assetResource) {
         var configs = core.configs(tenantId);

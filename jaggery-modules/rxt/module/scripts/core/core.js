@@ -29,13 +29,13 @@
  * @requires Packages.org.wso2.carbon.governance.api.util.GovernanceUtils
  */
 var core = {};
-(function(core, constants) {
+(function(core, constants,tenant) {
     var DEFAULT_MEDIA_TYPE = 'application/vnd.wso2.registry-ext-type+xml';
     var ASSET_PATH = '/_system/governance/repository/components/org.wso2.carbon.governance/types/';
     var RXT_MAP = 'rxt.manager.map';
     var EMPTY = '';
     var GovernanceUtils = Packages.org.wso2.carbon.governance.api.util.GovernanceUtils;
-    var DEFAULT_TENANT = -1234;
+    var DEFAULT_TENANT = tenant.getSuperTenantId();
     var utils = require('utils');
     var log = new Log('rxt.core');
     var applyDefinitionMutation = function(rxtDefinition, rxtMutation) {
@@ -1039,7 +1039,6 @@ var core = {};
         var user = require('store').user;
         var userDetails = server.current(session);
         if (!userDetails) {
-            log.info('Obtaining anon app context ');
             return this.createAnonAppContext(session, tenantID);
         } else {
             return this.createUserAppContext(session);
@@ -1109,4 +1108,4 @@ var core = {};
             session: session
         };
     };
-}(core, constants));
+}(core, constants,tenant));

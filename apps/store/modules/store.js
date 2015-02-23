@@ -725,7 +725,7 @@ var obtainViewQuery = function (options) {
 }
 
 var TENANT_STORE_MANAGERS = 'store.managers';
-var SUPER_TENANT = -1234;
+var SUPER_TENANT = require('rxt').tenant.getSuperTenantId();
 var APP_MANAGERS = 'application.master.managers';
 var LOGGED_IN_USER = 'LOGGED_IN_USER';
 
