@@ -50,6 +50,15 @@ var tenant = {};
         return tenatId;
     };
     tenant.getSuperTenantDomain = function() {
-        return 'carbon.super'; //Do not hard code this
+        var server = require('carbon').server;
+        return  server.superTenant.domain;
+    };
+    tenant.getSuperTenantId = function(){
+        var server = require('carbon').server;
+        return server.superTenant.tenatId;
+    };
+    tenant.superTenant = function(){
+        var server = require('carbon').server;
+        return server.superTenant;
     };
 }(tenant));
