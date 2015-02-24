@@ -903,7 +903,7 @@ var core = {};
         var options;
         matcher.match(assetResourcePattern)||matcher.match(assetBasePattern);
         options = matcher.elements();
-        if((!options.type)||(!options.domain)){
+        if(!options){
             log.warn('Asset resource path resolution detected anomaly for path: '+path+', better call saul :)');
             return path;
         }
@@ -933,7 +933,7 @@ var core = {};
         matcher.match(appResourcePattern)||matcher.match(appBasePattern);
         options = matcher.elements();
         if(!options){
-            log.warn('Asset resource path resolution detected anomaly for path: '+path+', better call saul :)');
+            log.warn('App resource path resolution detected anomaly for path: '+path+', better call saul :)');
             return path;
         }
         //Check if the path points to a resource in the tenant directory
@@ -950,7 +950,7 @@ var core = {};
             log.debug('extensions/app qualified app resource path '+rootAppPath);
             return rootAppPath;
         }
-        log.debg('Cannot match path to tenant qualified or top level APP resource : '+path);
+        log.debug('Cannot match path to tenant qualified or top level APP resource : '+path);
         return path;
     };
     /**

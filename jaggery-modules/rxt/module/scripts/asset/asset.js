@@ -1457,7 +1457,7 @@ var asset = {};
         var endpoint = new File(endpointPath);
         if (!endpoint.isExists()) {
             endpointPath = asset.getAssetDefaultPath(tenantId) + '/apis/' + endpointName;
-            endpointPath = core.resolveAppPath(endpointPath);
+            endpointPath = core.resolveAssetPath(endpointPath);
             endpoint = new File(endpointPath);
             if (!endpoint.isExists()) {
                 endpointPath = '';
