@@ -1428,7 +1428,7 @@ var asset = {};
     };
     asset.getAssetDefaultPath = function(tenantId) {
         var domain = tenant.getTenantDomain(tenantId);
-        return '/extensions/'+tenant.getTenantExtensionRoot()+'/'+domain+'/assets/default';
+        return '/extensions/'+tenant.getTenantExtensionRoot()+'/'+domain+'/assets/'+core.getDefaultAssetType();
     };
     asset.getAssetApiDirPath = function(type,tenantId) {
         return asset.getAssetExtensionPath(type,tenantId) + '/apis';
@@ -1453,9 +1453,11 @@ var asset = {};
         var tenantId = server.current(session).tenantId;
         //Check if the path exists within the asset extension path
         var endpointPath = asset.getAssetApiDirPath(type,tenantId) + '/' + endpointName;
+        endpointPath = core.resolveAssetPath(endpointPath);
         var endpoint = new File(endpointPath);
         if (!endpoint.isExists()) {
             endpointPath = asset.getAssetDefaultPath(tenantId) + '/apis/' + endpointName;
+            endpointPath = core.resolveAppPath(endpointPath);
             endpoint = new File(endpointPath);
             if (!endpoint.isExists()) {
                 endpointPath = '';
@@ -1488,9 +1490,11 @@ var asset = {};
         }
         //Check if the path exists within the asset extension path
         var endpointPath = asset.getAssetPageDirPath(type,tenantId) + '/' + endpointName;
+        endpointPath = core.resolveAssetPath(endpointPath);
         var endpoint = new File(endpointPath);
         if (!endpoint.isExists()) {
             endpointPath = asset.getAssetDefaultPath(tenantId) + '/pages/' + endpointName;
+            endpointPath = core.resolveAssetPath(endpointPath);
             endpoint = new File(endpointPath);
             if (!endpoint.isExists()) {
                 endpointPath = '';
@@ -1507,10 +1511,11 @@ var asset = {};
         var extensionMatcher = new URIMatcher(path);
         //TODO: Use the constants
         var uriPattern = '/{context}/asts/{type}/{+options}';
-        var extensionPattern = '/{root}/extensions/'+tenant.getTenantExtensionRoot()+'/{domain}/assets/{type}/{+suffix}';
+        var extensionTenantPattern = '/{root}/extensions/'+tenant.getTenantExtensionRoot()+'/{domain}/assets/{type}/{+suffix}';
+        var extensionBasePattern = '/{root}/extensions/assets/{type}/{+suffix}';
         var tenantedUriPattern = '/{context}/t/{domain}/asts/{type}/{+suffix}';
         uriMatcher.match(uriPattern) || uriMatcher.match(tenantedUriPattern); //TODO check with samples
-        extensionMatcher.match(extensionPattern);
+        extensionMatcher.match(extensionTenantPattern) || extensionMatcher.match(extensionBasePattern);
         var pathOptions = extensionMatcher.elements() || {};
         var uriOptions = uriMatcher.elements() || {};
         var domain = tenant.getSuperTenantDomain();//Assume that the tenant domain is not provided
@@ -1522,6 +1527,7 @@ var asset = {};
         if (!pathOptions.type) {
             //Determine if the paths occur within the extensions directory
             var extensionResPath = '/extensions/'+tenant.getTenantExtensionRoot()+'/'+domain+'/assets/' + uriOptions.type + '/themes/' + themeName + '/' + resPath;
+            extensionResPath = core.resolveAssetPath(extensionResPath);
             var resFile = new File(extensionResPath);
             if (resFile.isExists()) {
                 return extensionResPath;
@@ -1531,6 +1537,7 @@ var asset = {};
         }
         //Check if type has a similar path in its extension directory
         var extensionPath = '/extensions/'+tenant.getTenantExtensionRoot()+'/'+domain+'/assets/' + uriOptions.type + '/themes/' + themeName + '/' + pathOptions.root + '/' + pathOptions.suffix;
+        extensionPath = core.resolveAssetPath(extensionPath);
         var file = new File(extensionPath);
         if (file.isExists()) {
             return extensionPath;

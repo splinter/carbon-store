@@ -725,7 +725,8 @@ var app = {};
             log.warn('Could not locate the endpoint ' + url);
             return null;
         }
-        return getAppExtensionBasePath(tenantId) + '/' + endpoint.owner + '/pages/' + endpoint.path;
+        var path = getAppExtensionBasePath(tenantId) + '/' + endpoint.owner + '/pages/' + endpoint.path;
+        return core.resolveAppPath(path);
     };
     /**
      * Returns endpoint details of an api registered with the extensible application
@@ -782,7 +783,8 @@ var app = {};
             log.warn('Could not locate the endpoint ' + url);
             return null;
         }
-        return getAppExtensionBasePath(tenantId) + '/' + endpoint.owner + '/apis/' + endpoint.path;
+        var path = getAppExtensionBasePath(tenantId) + '/' + endpoint.owner + '/apis/' + endpoint.path;
+        return core.resolveAppPath(path);
     };
     /**
      * Returns details on a particular feature of the extensible application
@@ -940,11 +942,12 @@ var app = {};
         path = '/' + path;
         var uriMatcher = new URIMatcher(request.getRequestURI());
         var extensionMatcher = new URIMatcher(path);
-        var extensionPattern = '/{root}/extensions/'+tenant.getTenantExtensionRoot()+'/{domain}/app/{name}/{+suffix}';
+        var extensionTenantPattern = '/{root}/extensions/'+tenant.getTenantExtensionRoot()+'/{domain}/app/{name}/{+suffix}';
+        var extensionBasePattern = '/{root}/extensions/app/{name}/{+suffix}';
         var uriPattern = constants.APP_PAGE_URL_PATTERN;// '/{context}/pages/{+suffix}';
         var tenantedUriPattern = constants.APP_TENANT_PAGE_URL_PATTERN;//'/{context}/t/{domain}/pages/{+suffix}';
 
-        extensionMatcher.match(extensionPattern);
+        extensionMatcher.match(extensionTenantPattern)||extensionMatcher.match(extensionBasePattern);
         uriMatcher.match(uriPattern) ||uriMatcher.match(tenantedUriPattern);
         var extensionOptions = extensionMatcher.elements() || {};
         var uriOptions = uriMatcher.elements() || {};
@@ -970,6 +973,7 @@ var app = {};
                 return null;
             }
             var extensionResourcePath = '/extensions/'+tenant.getTenantExtensionRoot()+'/'+domain+'/app/' + endpoint.owner + '/themes/' + themeName + '/' + resPath;
+            extensionResourcePath = core.resolveAppPath(extensionResourcePath);
             //Check if the resource exists
             var extensionResource = new File(extensionResourcePath);
             if (extensionResource.isExists()) {
@@ -980,6 +984,7 @@ var app = {};
         }
         //The resource path references an app extension 
         var extensionPath = '/extensions/'+tenant.getTenantExtensionRoot()+'/'+domain+'/app/' + extensionOptions.name + '/themes/' + themeName + '/' + extensionOptions.root + '/' + extensionOptions.suffix;
+        extensionPath = core.resolveAppPath(extensionPath);
         var extensionFile = new File(extensionPath);
         if (extensionFile.isExists()) {
             return extensionPath;
