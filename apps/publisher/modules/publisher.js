@@ -92,16 +92,9 @@ var configs = function(tenantId) {
         registry = server.systemRegistry(tenantId);
     return JSON.parse(registry.content(PUBLISHER_CONFIG_PATH));
 };
-var addLifecycles = function(registry,tenantId) {
-
-    //Determine the tenant domain
-    var rxt = require('rxt');
-    var domain = rxt.tenant.getTenantDomain(tenantId);
-    //TODO: We need to try and load lifecycles from tenant domain extension directory /extensions/tenants/{domain}/lifecycles
-    var lcPath = '/extensions/'+rxt.tenant.getTenantExtensionRoot()+'/lifecycles';
-
+var deployLifecyclesInDir = function(path,registry,tenantId){
     var lc,
-        files = new File(lcPath),
+        files = new File(path),
         rootReg = registry.registry,
         configReg = rootReg.getChrootedRegistry('/_system/config'),
         CommonUtil = Packages.org.wso2.carbon.governance.lcm.util.CommonUtil;
@@ -119,10 +112,24 @@ var addLifecycles = function(registry,tenantId) {
         log.debug('Is life-cycle present: ' + isPresent);
         //Only add the lifecycle if it is not present in the registry
         if (!isPresent) {
-            log.debug('Adding life-cycle since it is not deployed.');
+            log.debug('Deploying life-cycle :' + lcJSON.name+' for tenant: '+tenantId);
             CommonUtil.addLifecycle(lc, configReg, rootReg);
         }
     });
+};
+var addLifecycles = function(registry,tenantId) {
+    //Determine the tenant domain
+    var rxt = require('rxt');
+    var domain = rxt.tenant.getTenantDomain(tenantId);
+    //TODO: We need to try and load lifecycles from tenant domain extension directory /extensions/tenants/{domain}/lifecycles
+    var tenantLcPath = '/extensions/'+rxt.tenant.getTenantExtensionRoot()+'/lifecycles';
+    var defaultLcPath = '/extensions/lifecycles';
+
+    //First check the lifecycles directory of the tenant
+    deployLifecyclesInDir(tenantLcPath,registry,tenantId);
+    
+    //Attempt to deploy the lifecycles in the extensions/lifecycles directory
+    deployLifecyclesInDir(defaultLcPath,registry,tenantId);
 };
 var publisher = function(o, session) {
     var publisher, tenantId, store,
