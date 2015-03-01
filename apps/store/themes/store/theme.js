@@ -220,7 +220,7 @@ var resolve = function(path) {
     var app = require('rxt').app;
     var appPath = app.resolve(request, path, this.name, this, themeResolver, session);
     if (!appPath) {
-        path = asset.resolve(request, path, this.name, this, themeResolver);
+        path = asset.resolve(request, path, this.name, this, themeResolver,session);
     } else {
         path = appPath;
     }

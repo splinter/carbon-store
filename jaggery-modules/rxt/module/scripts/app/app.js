@@ -940,6 +940,7 @@ var app = {};
     app.resolve = function(request, path, themeName, themeObj, themeResolver, session) {
         var resPath = path;
         path = '/' + path;
+        log.info('Caramel app resolve :: '+path);
         var uriMatcher = new URIMatcher(request.getRequestURI());
         var extensionMatcher = new URIMatcher(path);
         var extensionTenantPattern = '/{root}/extensions/'+tenant.getTenantExtensionRoot()+'/{domain}/app/{name}/{+suffix}';

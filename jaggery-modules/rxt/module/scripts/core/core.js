@@ -903,25 +903,47 @@ var core = {};
         var options;
         matcher.match(assetResourcePattern)||matcher.match(assetBasePattern);
         options = matcher.elements();
+        log.info('Resolving path :: '+path);
         if(!options){
-            log.warn('Asset resource path resolution detected anomaly for path: '+path+', better call saul :)');
+            log.info('Asset resource path resolution detected anomaly for path: '+path+', better call saul :)');
             return path;
         }
+
         //Check if the path appears in the tenant directory
         var resource = new File(path);
 
         if(resource.isExists()){
-            log.debug('extensions/tenants qualified asset resource path '+path);
+            log.info('extensions/tenants qualified asset resource path '+path);
             return path;
         }
+        log.info('Failed to detect tenant qualified path');
+
+        //Check if the path appears in the default asset type folder
+        var defaultAssetTypePath = '/extensions/'+tenant.getTenantExtensionRoot()+'/'+options.domain+'/assets/'+core.getDefaultAssetType()+'/'+(options.suffix?options.suffix:'');
+        var defaultAssetTypeResource = new File(defaultAssetTypePath);
+        if(defaultAssetTypeResource.isExists()){
+            log.info('extensions/tenants/carbon.super qualified asset resource path: '+path);
+            return defaultAssetTypePath;
+        }
+
         //Check if the path appears in top level assets directory
         var rootAssetsPath = '/extensions/assets/'+options.type+'/'+(options.suffix?options.suffix:'');
         var rootAssetResource = new File(rootAssetsPath);
         if(rootAssetResource.isExists()){
-            log.debug('extensions/assets qualified asset resource path '+rootAssetsPath);
+            log.info('extensions/assets qualified asset resource path: '+rootAssetsPath);
             return rootAssetsPath;
         }
-        log.debug('Cannot match path to tenant qualified or top level ASSET resource : '+path);
+        log.info('Failed to detect assets qualified path');
+        //Check if the path appears in the top level default assets directory
+        var rootDefaultAssetTypePath = '/extensions/assets/'+core.getDefaultAssetType()+'/'+(options.suffix?options.suffix:'');
+        var rootDefaultAssetTypeResource = new File(rootDefaultAssetTypePath);
+
+        if(rootDefaultAssetTypeResource.isExists()){
+            log.info('extensions/assets/default qualfied asset resource path: '+rootDefaultAssetTypePath);
+            return rootDefaultAssetTypePath;
+        }
+        log.info('Failed to detect default asset qualified path');
+        log.info('Cannot match path to tenant qualified or top level ASSET resource : '+path);
         return path;
     };
     core.resolveAppPath = function(path){

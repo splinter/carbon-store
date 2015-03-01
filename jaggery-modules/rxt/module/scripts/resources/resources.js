@@ -79,6 +79,7 @@ var resources = {};
     var loadDefaultAssetScript = function(options, type, assetResource,tenantId) {
         var path = getDefaultAssetScriptPath(options,tenantId);
         path = core.resolveAssetPath(path);
+        log.info('Loading default asset script content from: '+path);
         var content = loadAssetScriptContent(path);
         if (content) {
             assetResource = evalAssetScript(content, assetResource,core.getDefaultAssetType(),core.getDefaultAssetType());

@@ -1502,10 +1502,11 @@ var asset = {};
         }
         return endpointPath;
     };
-    asset.resolve = function(request, path, themeName, themeObj, themeResolver) {
+    asset.resolve = function(request, path, themeName, themeObj, themeResolver,session) {
         var log = new Log();
         var resPath = path;
         path = '/' + path;
+        log.info('Caramel resolve :: '+path);
         //Determine the type of the asset
         var uriMatcher = new URIMatcher(request.getRequestURI());
         var extensionMatcher = new URIMatcher(path);
@@ -1518,10 +1519,17 @@ var asset = {};
         extensionMatcher.match(extensionTenantPattern) || extensionMatcher.match(extensionBasePattern);
         var pathOptions = extensionMatcher.elements() || {};
         var uriOptions = uriMatcher.elements() || {};
+        var server = require('store').server;
+        var user = server.current(session);
         var domain = tenant.getSuperTenantDomain();//Assume that the tenant domain is not provided
 
         if(uriOptions.domain){
             domain = uriOptions.domain;
+        }
+
+        if(user){
+            log.info('Obtaining tenant domain from logged in user '+domain);
+            domain = tenant.getTenantDomain(user.tenantId);
         }
         //If the type is not metioned then return the path
         if (!pathOptions.type) {
