@@ -98,7 +98,14 @@ var api = {};
         var destinationAppPath = buildPathToApp(destinationApp);
         var fullSourceRootPath = [sourceAppPath, sourceRootPath].join('/');
         var ptr = new java.io.File(fullSourceRootPath);
-        rec2copy(ptr, sourceRootPath, destinationRootPath, '', sourceAppPath, destinationAppPath);
+        var status;
+        try {
+            rec2copy(ptr, sourceRootPath, destinationRootPath, '', sourceAppPath, destinationAppPath);
+            status = true;
+        } catch (e) {
+            log.error('Failed to copy usecase', e);
+        }
+        return status;
     };
     var rec2remove = function(sourceFilePtr, sourceRootPath, destinationRootPath, traversedPath, sourceAppPath, destinationAppPath) {
         if (!sourceFilePtr.isDirectory()) {
@@ -125,27 +132,14 @@ var api = {};
         var destinationAppPath = buildPathToApp(destinationApp);
         var fullSourceRootPath = [sourceAppPath, sourceRootPath].join('/');
         var ptr = new java.io.File(fullSourceRootPath);
-        rec2remove(ptr, sourceRootPath, destinationRootPath, '', sourceAppPath, destinationAppPath);
-    };
-    var recursiveRemove = function(root, rootPath, destinationRootPath, fullPathToRoot) {
-        if (!root.isDirectory()) {
-            var toFilePath = destinationRootPath + rootPath + '/' + root.getName();
-            removeResource(toFilePath);
-            return;
-        } else if ((root.isDirectory()) && (root.listFiles().length == 0)) {
-            return;
-        } else {
-            var files = root.listFiles();
-            var file;
-            for (var index = 0; index < files.length; index++) {
-                file = files[index];
-                recursiveRemove(file, rootPath, destinationRootPath, fullPathToRoot);
-            }
-            if (root.isDirectory()) {
-                var path = destinationRootPath + rootPath + '/' + root.getName();
-                removeDir(path);
-            }
+        var status;
+        try {
+            rec2remove(ptr, sourceRootPath, destinationRootPath, '', sourceAppPath, destinationAppPath);
+            status = true;
+        } catch (e) {
+            log.error('Unable to remove usecase', e);
         }
+        return status;
     };
     api.install = function(usecaseId, appName, request, response, session) {
         var sourceRoot = resolvePath(usecaseId, appName);
@@ -186,7 +180,7 @@ var api = {};
                 status = copy2(pathToExtensions + '/' + subResource.getName(), '/extensions/' + subResource.getName(), 'test-api', 'test-api');
             }
         }
-        return status;
+        return (status === 'undefined') ? false : status;
     };
     api.uninstall = function(usecaseId, appName, args) {
         var sourceRoot = resolvePath(usecaseId, appName);
@@ -196,7 +190,6 @@ var api = {};
         if (mainScript.isExists()) {
             var mainScriptModule = require(pathToMainScript);
             if (mainScriptModule.hasOwnProperty('uninstall')) {
-                log.info('Executing main.js of ' + usecaseId);
                 status = mainScriptModule.uninstall({
                     remove: remove2,
                     resolve: resolvePath,
@@ -208,8 +201,7 @@ var api = {};
                     res: response,
                     session: session
                 });
-                status = (status === 'undefined') ? false : status;
-                return status;
+                return (status === 'undefined') ? false : status;;
             }
         }
         //Check if the source root has an extension directory
@@ -225,9 +217,9 @@ var api = {};
             subResource = subResources[index];
             if (subResource.isExists()) {
                 log.info('removing resource ' + subResource.getName());
-                status = remove2(sourceRoot + '/' + subResource.getName(), '/extensions/'+subResource.getName(), 'test-api', 'test-api');
+                status = remove2(sourceRoot + '/' + subResource.getName(), '/extensions/' + subResource.getName(), 'test-api', 'test-api');
             }
         }
-        return status;
+        return (status === 'undefined') ? false : status;;
     };
 }(api));
