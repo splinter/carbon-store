@@ -65,33 +65,67 @@ var api = {};
             Commons.forceDelete(file);
             return;
         }
-        log.info('Resource does not exist ' + to);
+        log.debug('Resource does not exist ' + to);
     };
     var resourceExists = function(file) {
         return file.exists();
     };
-    var recursiveCopy = function(root, rootPath, destinationRootPath, fullPathToRoot) {
-        log.info(rootPath);
-        if (!root.isDirectory()) {
-            var toFilePath = destinationRootPath + rootPath + '/' + root.getName();
-            var fromFilePath = fullPathToRoot + rootPath + '/' + root.getName();
-            copyResource(fromFilePath, toFilePath);
-            return;
-        } else if ((root.isDirectory()) && (root.listFiles().length == 0)) {
+    var rec2copy = function(sourceFilePtr, sourceRootPath, destinationRootPath, traversedPath, sourceAppPath, destinationAppPath) {
+        if (!sourceFilePtr.isDirectory()) {
+            var srcFile = [sourceAppPath, sourceRootPath, traversedPath].join('/');
+            var destinationFile = [destinationAppPath, destinationRootPath, traversedPath].join('/');
+            copyResource(srcFile, destinationFile);
             return;
         } else {
-            if (root.isDirectory()) {
-                var path = destinationRootPath + rootPath + '/' + root.getName();
-                mkdir(path);
-            }
-            var files = root.listFiles();
+            //Copy the directory
+            var destinationDir = [destinationAppPath, destinationRootPath, sourceFilePtr.getName()].join('/');
+            mkdir(destinationDir);
+            var subResources = sourceFilePtr.listFiles();
             var file;
-            rootPath += '/' + root.getName();
-            for (var index = 0; index < files.length; index++) {
-                file = files[index];
-                recursiveCopy(file, rootPath, destinationRootPath, fullPathToRoot);
+            for (var index = 0; index < subResources.length; index++) {
+                file = subResources[index];
+                if (traversedPath === '') {
+                    traversedPath += file.getName();
+                } else {
+                    traversedPath = [traversedPath, file.getName()].join('/');
+                }
+                rec2copy(file, sourceRootPath, destinationRootPath, traversedPath, sourceAppPath, destinationAppPath);
             }
         }
+    };
+    var copy2 = function(sourceRootPath, destinationRootPath, sourceApp, destinationApp) {
+        var sourceAppPath = buildPathToApp(sourceApp);
+        var destinationAppPath = buildPathToApp(destinationApp);
+        var fullSourceRootPath = [sourceAppPath, sourceRootPath].join('/');
+        var ptr = new java.io.File(fullSourceRootPath);
+        rec2copy(ptr, sourceRootPath, destinationRootPath, '', sourceAppPath, destinationAppPath);
+    };
+    var rec2remove = function(sourceFilePtr, sourceRootPath, destinationRootPath, traversedPath, sourceAppPath, destinationAppPath) {
+        if (!sourceFilePtr.isDirectory()) {
+            var destinationFile = [destinationAppPath, destinationRootPath, traversedPath].join('/');
+            removeResource(destinationFile);
+            return;
+        } else {
+            var subResources = sourceFilePtr.listFiles();
+            for (var index = 0; index < subResources.length; index++) {
+                file = subResources[index];
+                if (traversedPath === '') {
+                    traversedPath += file.getName();
+                } else {
+                    traversedPath = [traversedPath, file.getName()].join('/');
+                }
+                rec2remove(file, sourceRootPath, destinationRootPath, traversedPath, sourceAppPath, destinationAppPath);
+            }
+            var destinationDir = [destinationAppPath, destinationRootPath, sourceFilePtr.getName()].join('/');
+            removeDir(destinationDir);
+        }
+    };
+    var remove2 = function(sourceRootPath, destinationRootPath, sourceApp, destinationApp) {
+        var sourceAppPath = buildPathToApp(sourceApp);
+        var destinationAppPath = buildPathToApp(destinationApp);
+        var fullSourceRootPath = [sourceAppPath, sourceRootPath].join('/');
+        var ptr = new java.io.File(fullSourceRootPath);
+        rec2remove(ptr, sourceRootPath, destinationRootPath, '', sourceAppPath, destinationAppPath);
     };
     var recursiveRemove = function(root, rootPath, destinationRootPath, fullPathToRoot) {
         if (!root.isDirectory()) {
@@ -113,42 +147,6 @@ var api = {};
             }
         }
     };
-    var copy = function(options) {
-        // var destinationAppName = 'test-api';
-        // var sourceAppName = 'test-api';
-        // var destinationRootDir='/temp';
-        // var sourceRoot='/usecases/default/uc1-a';
-        // var sourceRootDir='/assets';
-        // var root = new File(sourceRoot+sourceRootDir);
-        var destinationAppName = options.destinationAppName;
-        var sourceAppName = options.sourceAppName;
-        var destinationRootDir = options.destinationRootDir;
-        var sourceRoot = options.sourceRoot;
-        var sourceRootDir = options.sourceRootDir;
-        var root = new File(sourceRoot + sourceRootDir);
-        try {
-            recursiveCopy(root, '', buildPathToApp(destinationAppName) + destinationRootDir, buildPathToApp(sourceAppName) + sourceRoot);
-        } catch (e) {
-            log.error('Copy action failed', e);
-            return false;
-        }
-        return true;
-    };
-    var remove = function(options) {
-        var destinationAppName = options.destinationAppName;
-        var sourceAppName = options.sourceAppName;
-        var destinationRootDir = options.destinationRootDir;
-        var sourceRoot = options.sourceRoot;
-        var sourceRootDir = options.sourceRootDir;
-        var root = new File(sourceRoot + sourceRootDir);
-        try {
-            recursiveRemove(root, '', buildPathToApp(destinationAppName) + destinationRootDir, buildPathToApp(sourceAppName) + sourceRoot);
-        } catch (e) {
-            log.error('Remove action failed', e);
-            return false;
-        }
-        return true;
-    };
     api.install = function(usecaseId, appName, request, response, session) {
         var sourceRoot = resolvePath(usecaseId, appName);
         var pathToMainScript = sourceRoot + '/main.js';
@@ -158,16 +156,17 @@ var api = {};
             var mainScriptModule = require(pathToMainScript);
             if (mainScriptModule.hasOwnProperty('install')) {
                 status = mainScriptModule.install({
-                    copy: copy,
+                    copy: copy2,
                     resolve: resolvePath,
                     destinationAppName: appName,
                     sourceAppName: 'test-api',
                     usecaseId: usecaseId,
                     sourceRoot: sourceRoot,
-                    req: req,
+                    req: request,
                     res: response,
                     session: session
-                }) || true;
+                });
+                status = (status === 'undefined') ? false : status;
                 return status;
             }
         }
@@ -178,21 +177,16 @@ var api = {};
             log.error('Failed to copy use cases as the use case directory does not have an extensions directory');
             return status;
         }
-        status = copy({
-            sourceAppName: 'test-api',
-            destinationAppName: appName,
-            destinationRootDir: '/',
-            sourceRoot: sourceRoot,
-            sourceRootDir: '/extensions'
-        });
+        var subResources = extensionsDir.listFiles();
+        var subResource;
+        for (var index = 0; index < subResources.length; index++) {
+            subResource = subResources[index];
+            if (subResource.isDirectory()) {
+                log.info('copying resource ' + subResource.getName());
+                status = copy2(pathToExtensions + '/' + subResource.getName(), '/extensions/' + subResource.getName(), 'test-api', 'test-api');
+            }
+        }
         return status;
-        // copy({
-        // 	sourceAppName:'test-api',
-        // 	destinationAppName:'test-api',
-        // 	destinationRootDir:'/temp',
-        // 	sourceRoot:'/usecases/default/uc1-a',
-        // 	sourceRootDir:'/assets'
-        // });
     };
     api.uninstall = function(usecaseId, appName, args) {
         var sourceRoot = resolvePath(usecaseId, appName);
@@ -202,18 +196,19 @@ var api = {};
         if (mainScript.isExists()) {
             var mainScriptModule = require(pathToMainScript);
             if (mainScriptModule.hasOwnProperty('uninstall')) {
-            	log.info('Executing main.js of '+usecaseId);
+                log.info('Executing main.js of ' + usecaseId);
                 status = mainScriptModule.uninstall({
-                    copy: copy,
+                    remove: remove2,
                     resolve: resolvePath,
                     destinationAppName: appName,
                     sourceAppName: 'test-api',
                     usecaseId: usecaseId,
                     sourceRoot: sourceRoot,
-                    req: req,
+                    req: request,
                     res: response,
                     session: session
-                }) || true;
+                });
+                status = (status === 'undefined') ? false : status;
                 return status;
             }
         }
@@ -224,13 +219,15 @@ var api = {};
             log.error('Failed to copy use cases as the use case directory does not have an extensions directory');
             return status;
         }
-        status = remove({
-            sourceAppName: 'test-api',
-            destinationAppName: appName,
-            destinationRootDir: '/',
-            sourceRoot: sourceRoot,
-            sourceRootDir: '/extensions'
-        });
+        var subResources = extensionsDir.listFiles();
+        var subResource;
+        for (var index = 0; index < subResources.length; index++) {
+            subResource = subResources[index];
+            if (subResource.isExists()) {
+                log.info('removing resource ' + subResource.getName());
+                status = remove2(sourceRoot + '/' + subResource.getName(), '/extensions/'+subResource.getName(), 'test-api', 'test-api');
+            }
+        }
         return status;
     };
 }(api));

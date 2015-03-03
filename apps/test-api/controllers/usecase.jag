@@ -38,21 +38,23 @@ var log = new Log();
     options = uriMatcher.elements();
     if (!options.id) {
         //Request was not made correctly
-        response.sendError(400, 'Request must include  the usecase id');
+        response.sendError(400, 'Request must include the usecase id');
         return;
     }
     queryArgs = request.getAllParameters('UTF-8');
     if (!queryArgs.app) {
         //Request should include the app name
-        response.sendError(400, 'Request must include the destionation application to which the use cases should be copied');
+        response.sendError(400, 'Request must include the destination application to which the use cases should be copied');
         return;
     }
     if (options.action === 'install') {
     	log.info('Installing usecase '+options.id);
         status = api.install(options.id, queryArgs.app, request, response, session);
+        log.info('Finished installing usecase '+options.id);
     } else if (options.action === 'uninstall') {
     	log.info('Uninstalling usecase '+options.id);
         status = api.uninstall(options.id, queryArgs.app, request, response, session);
+        log.info('Finished uninstalling usecase '+options.id);
     } else {
         response.sendError(404, 'Action is not supported');
     }
