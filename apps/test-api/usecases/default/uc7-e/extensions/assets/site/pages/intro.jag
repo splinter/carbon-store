@@ -1,0 +1,3 @@
+<%
+	print('intro site page');
+%>

@@ -1,0 +1,5 @@
+<%
+
+	print('carbon.super empty asset details page for GADGETS');
+
+%>

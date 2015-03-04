@@ -16,9 +16,21 @@
  *  under the License.
  *
  */
-var install = function(ctx) {
-    return ctx.copy(ctx.sourceRoot + '/extensions/assets', '/extensions/tenants/test.com/assets', 'test-api', 'test-api');
-};
-var uninstall = function(ctx) {
-    return ctx.remove(ctx.sourceRoot + '/extensions/assets', '/extensions/tenants/test.com/assets', 'test-api', 'test-api');
+app.dependencies = ['publisher-common'];
+app.server = function(ctx) {
+    return {
+        endpoints: {
+            pages: [{
+                title: 'Publisher | Splash page',
+                url: 'splash',
+                path: 'splash.jag'
+            }]
+        },
+        configs: {
+            landingPage: '/asts/ebook/list',
+            disabledAssets: ['ebook', 'api', 'wsdl', 'service','policy','proxy','schema','sequence','servicex','uri','wadl','endpoint']
+        },
+        onLoadedServerConfigs:function(configs){
+        }
+    }
 };

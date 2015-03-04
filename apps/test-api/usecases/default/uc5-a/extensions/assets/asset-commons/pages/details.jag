@@ -1,0 +1,5 @@
+<%
+
+	print('Empty asset details page');
+
+%>

@@ -103,8 +103,9 @@ var api = {};
             rec2copy(ptr, sourceRootPath, destinationRootPath, '', sourceAppPath, destinationAppPath);
             status = true;
         } catch (e) {
-            log.error('Failed to copy usecase', e);
+            log.info('Failed to copy usecase', e);
         }
+        log.info('Copy success '+status);
         return status;
     };
     var rec2remove = function(sourceFilePtr, sourceRootPath, destinationRootPath, traversedPath, sourceAppPath, destinationAppPath) {
@@ -137,7 +138,7 @@ var api = {};
             rec2remove(ptr, sourceRootPath, destinationRootPath, '', sourceAppPath, destinationAppPath);
             status = true;
         } catch (e) {
-            log.error('Unable to remove usecase', e);
+            log.info('Unable to remove usecase', e);
         }
         return status;
     };
@@ -160,7 +161,7 @@ var api = {};
                     res: response,
                     session: session
                 });
-                status = (status === 'undefined') ? false : status;
+                status =  (status === undefined) ? false : status;
                 return status;
             }
         }
@@ -180,7 +181,7 @@ var api = {};
                 status = copy2(pathToExtensions + '/' + subResource.getName(), '/extensions/' + subResource.getName(), 'test-api', 'test-api');
             }
         }
-        return (status === 'undefined') ? false : status;
+        return (status === undefined) ? false : status;
     };
     api.uninstall = function(usecaseId, appName, args) {
         var sourceRoot = resolvePath(usecaseId, appName);
@@ -201,7 +202,7 @@ var api = {};
                     res: response,
                     session: session
                 });
-                return (status === 'undefined') ? false : status;;
+                return (status === undefined) ? false : status;
             }
         }
         //Check if the source root has an extension directory
@@ -220,6 +221,6 @@ var api = {};
                 status = remove2(sourceRoot + '/' + subResource.getName(), '/extensions/' + subResource.getName(), 'test-api', 'test-api');
             }
         }
-        return (status === 'undefined') ? false : status;;
+        return (status === undefined) ? false : status;
     };
 }(api));

@@ -1,0 +1,4 @@
+<%
+
+	print('carbon.super gadget  test-resource api');
+%>

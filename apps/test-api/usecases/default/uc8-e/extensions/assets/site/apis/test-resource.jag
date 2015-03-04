@@ -1,0 +1,4 @@
+<%
+
+	print('site test-resource api');
+%>

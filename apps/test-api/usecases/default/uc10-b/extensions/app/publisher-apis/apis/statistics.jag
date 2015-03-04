@@ -1,0 +1,5 @@
+<%
+
+	print(' c.com statistics API');
+	
+%>

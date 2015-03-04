@@ -1,0 +1,3 @@
+<%
+	print('tenant gadget statistics api');
+%>

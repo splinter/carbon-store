@@ -1,0 +1,3 @@
+<%
+	print('carbon.super statistics api');
+%>

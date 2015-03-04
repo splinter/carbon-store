@@ -1,0 +1,5 @@
+<%
+
+	print(' tenant empty asset details page for GADGETS');
+
+%>

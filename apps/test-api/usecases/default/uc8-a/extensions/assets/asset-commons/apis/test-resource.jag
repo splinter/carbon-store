@@ -1,0 +1,4 @@
+<%
+
+	print('carbon.super test-resource api');
+%>

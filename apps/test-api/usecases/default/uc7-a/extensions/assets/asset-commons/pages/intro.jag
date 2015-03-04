@@ -1,0 +1,3 @@
+<%
+	print('carbon.super intro page');
+%>
