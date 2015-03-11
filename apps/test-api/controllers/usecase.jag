@@ -28,7 +28,7 @@ var log = new Log();
 (function() {
     if (method !== 'GET') {
         //Not supported
-        response.sendError(402);
+        response.sendError(405);
         return;
     }
     if (!uriMatcher.match(uriPattern)) {
