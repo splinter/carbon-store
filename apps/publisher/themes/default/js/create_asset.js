@@ -20,8 +20,18 @@ $(function(){
 	var obtainFormMeta=function(formId){
 		return $(formId).data();
 	};
+    var populateTags = function(arr){
+        var entry;
+        for(var index = 0 ; index < arr.length; index++){
+            entry = arr [index];
+            if(entry.name === '_tags'){
+                entry.value = tagsAPI.selectedTags();
+            }
+        }
+    };
     $('#form-asset-create').ajaxForm({
-        beforeSubmit:function(){
+        beforeSubmit:function(arr){
+            populateTags(arr);
             PublisherUtils.blockButtons({
                 container:'saveButtons',
                 msg:'Creating the '+PublisherUtils.resolveCurrentPageAssetType()+ ' instance'
