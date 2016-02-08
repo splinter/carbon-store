@@ -1,0 +1,188 @@
+<% 
+	var debugInfo = session.get('DEBUG_DATA');
+	var resourcePaths = debugInfo.paths;
+	var processedPaths = {};
+	processedPaths.js = [];
+	processedPaths.css = [];
+	processedPaths.hbs = [];
+	var path;
+	for(var index =0 ; index < resourcePaths.length; index++){
+		path = resourcePaths[index];
+		if(path.modified.indexOf('/css/') > -1){
+			path.type = 'css';
+			processedPaths.css.push(path);
+		} else if(path.modified.indexOf('/js/') > -1){
+			path.type = 'js';
+			processedPaths.js.push(path);
+		} else if(path.modified.indexOf('.hbs') > -1){
+			path.type = 'hbs';
+		}
+		else {
+			path.type = 'other';
+		}
+	}
+
+	function mapIcon(type){
+		var mapping='fw fw-question';
+		switch(type){
+			case 'css': mapping='fw fw-policy'; break;
+			case 'js': mapping = 'fw fw-javascript'; break;
+			case 'hbs': mapping = 'fw fw-html'; break;
+			default: break;
+		}
+		return mapping;
+	}
+	var pageControllerPath = request.getMappedPath();
+	var mappedRenderer = caramel.theme().resolve("renderers" + pageControllerPath.substring(0, pageControllerPath.length - 4) + '.js');
+	log.info(mappedRenderer);
+	var script = require(mappedRenderer.trim()).render;
+	var partials;
+	var mappedPartials;
+	script(function(layput,map){
+		mappedPartials = map;
+		partials = Object.keys(map);
+	},debugInfo.data,debugInfo.meta,null);
+	//function themeLogger(layout,map){
+	//	partials = Object.keys(map);
+	//};
+	log.info('Partials ');
+	log.info(partials);
+	function buildPageStructure(rootPartials){
+		var page = {};
+		for(var key in rootPartials){
+			log.info('Inspecting partial '+rootPartials[key][0]);
+			if(rootPartials[key][0].partial){
+				log.info('Adding partial '+rootPartials[key].partial);
+				page[rootPartials[key][0].partial] = {};
+				page[rootPartials[key][0].partial].mapping = caramel.theme().resolve('partials/'+rootPartials[key][0].partial+'.hbs');
+			}
+		}
+		return page;
+	}
+	var structure = buildPageStructure(mappedPartials);
+	var match = /\{\{\>(?:)(.*)\}\}/g; //new RegExp("\{\{\>(?:)(.*)\}\}/g");
+	function readStructure(entry){
+		var file = new File(entry.mapping);
+		if(file.isExists()){
+			try{
+					file.open('r');
+					var content = file.readAll();
+					//log.info('read partial '+entry);
+					var childPartials = content.match(match);
+					var childPartialName;
+					for(var i =0; i < childPartials.length; i++){
+						childPartialName = childPartials[i].split(' ')[1];
+						childPartialName = childPartialName.replace('}}','');
+						log.info('Child Partial: '+childPartialName);
+
+						if(!entry.childPartials){
+							entry.childPartials = {};
+						}
+
+						entry.childPartials[childPartialName] = {};
+						entry.childPartials[childPartialName].mapping = caramel.theme().resolve('partials/'+childPartialName+'.hbs');
+						//Try to load any children
+						readStructure(entry.childPartials[childPartialName]);
+					}
+					//log.info(entry.mapping);
+					//log.info(content);
+				}catch(e){
+
+				} finally{
+					file.close();
+				}
+		} else {
+			log.info(entry.mapping + ' skipped');
+		}
+	}
+	log.info('Reading structure');
+	log.info(structure);
+	for(var key in structure){
+		readStructure(structure[key]);
+	}
+
+	log.info('FINAL PAGE STRUCTURE');
+	log.info(structure);
+
+	function printStructure(structure){
+		log.info('PRINTING PARTIALS USED');
+		print('<ul>');
+		for(var key in structure){
+			log.info('Printing '+key);
+			print('<li>');
+			print('<a>')
+			print(structure[key].mapping);
+			print('</a>');
+			recursivePrint(structure[key]);
+			print('</li>');
+		}
+		print('</ul>');
+		log.info('FINISHED PRINTING PARTIALS USED');
+	}
+
+	function recursivePrint(entry){
+		if(entry.childPartials) {
+				print('<ul>');
+				for(var key in entry.childPartials){
+					print('<li>');
+					print('<a>');
+					print(entry.childPartials[key].mapping);
+					print('</a>');
+					recursivePrint(entry.childPartials[key]);
+					print('</li>');
+				}
+				print('<ul>');
+		} else {
+			print('<ul><li>');
+			print(entry.mapping);
+			print('</li></ul>');
+		}
+
+	}
+%>
+<html>
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="../../extensions/app/debug-viewer/public/css/bootstrap.min.css"
+    rel="stylesheet">
+    <link rel="stylesheet" href="../../extensions/app/debug-viewer/public/css/font-wso2.css">
+    <title>Debug Viewer</title>
+</head>
+<body>
+	<legend>Page Controller <% print(pageControllerPath); %> </legend>
+	<legend>Renderer <% print(mappedRenderer); %></legend>
+	<div>
+		<legend>Partial Structure of page</legend>
+		<div>
+			<% printStructure(structure); %>
+		</div>
+	</div>
+    <div>
+    	<legend><i class="fw fw-server"></i> Resources</legend>
+		<table class="table table-striped">
+			<thead> 
+				<tr>
+					<th> TYPE</th>
+					<th> ORIGINAL RESOURCE </th>
+					<th> MAPPED RESOURCE </th>
+				</tr>
+			</thead>
+			<tbody>
+				<%  
+				var path;
+				for(var index = 0 ; index < resourcePaths.length; index ++ ) { 
+					path = resourcePaths[index];
+					print('<tr>');
+					print('<td>');
+					print('<i class="'+mapIcon(path.type)+'"></i>');
+					print('</td>')
+					print('<td>'+path.original+'</td><td>'+path.modified+'</td>');
+					print('</tr>');
+				}
+				%>
+			</tbody>
+		</table>
+    </div>
+</body>
+</html>

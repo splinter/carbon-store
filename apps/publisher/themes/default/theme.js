@@ -18,12 +18,27 @@
  */
 var cache = false;
 var log = new Log();
+var debugInfo;
+print = function(){
+    log.info('!!!');
+};
 var engine = caramel.engine('handlebars', (function() {
     return {
         partials: function(Handlebars) {
             var theme = caramel.theme();
             var partials = function(file) {
                 (function register(prefix, file) {
+                    //log.info('Loading partial '+file.getPath());
+                    var entry = {};
+                    if(!debugInfo){
+                        debugInfo= {};
+                    }
+                    if(!debugInfo.paths) {
+                        debugInfo.paths =[];
+                    }
+                    entry.original = file.getPath();
+                    entry.modified = entry.original;
+                    debugInfo.paths.push(entry);
                     var i, length, name, files;
                     if (file.isDirectory()) {
                         files = file.listFiles();
@@ -59,6 +74,7 @@ var engine = caramel.engine('handlebars', (function() {
             Handlebars.registerHelper('dyn', function(options) {
                 var asset = options.hash.asset,
                     resolve = function(path) {
+                        log.info('DYN');
                         var p,
                             publisher = require('/modules/publisher.js');
                         if (asset) {
@@ -593,7 +609,17 @@ var engine = caramel.engine('handlebars', (function() {
             });
         },
         render: function(data, meta) {
-            this.__proto__.render.call(this, data, meta);
+            //var debugData = {};
+            debugInfo.data = data;
+            debugInfo.meta = meta;
+            var debugFlag = request.getParameter('debug');
+            if(debugFlag){
+                this.__proto__.render.call(this, data, meta);
+                session.put('DEBUG_DATA',debugInfo);
+                include('/extensions/app/debug-viewer/pages/debug-view.jag');
+            }else {
+                this.__proto__.render.call(this, data, meta);
+            }
         },
         globals: function(data, meta) {
             var publisher = require('/modules/publisher.js'),
@@ -605,6 +631,8 @@ var engine = caramel.engine('handlebars', (function() {
     };
 }()));
 var resolve = function(path) {
+    var pathMapping = {};
+    pathMapping.original = path;
     /*var themeResolver = this.__proto__.resolve;
     var asset = require('rxt').asset;
     path = asset.resolve(request, path, this.name, this, themeResolver);
@@ -620,5 +648,17 @@ var resolve = function(path) {
     } else {
         path = appPath;
     }
+    
+    if(!debugInfo){
+        debugInfo = {};
+        debugInfo.paths = [];
+    }
+    if((!debugInfo) && (!debugInfo.paths)) {
+        debugInfo.paths = [];
+    }
+    pathMapping.modified = path;
+    debugInfo.paths.push(pathMapping);
+    log.info("[custom resolve] path "+path);
     return path;
 };
+
