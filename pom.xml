@@ -677,7 +677,7 @@
         <commons-codec.osgi.version>1.4.0.wso2v1</commons-codec.osgi.version>
         <gson.version>2.2.4</gson.version>
         <json.version>20070829</json.version>
-        <junit.version>3.8.1</junit.version>
+        <junit.version>4.13.1</junit.version>
         <shindig.version>2.5.0-beta5</shindig.version>
         <el.api.version>2.2</el.api.version>
         <h2.wso2.version>1.2.140.wso2v3</h2.wso2.version>
